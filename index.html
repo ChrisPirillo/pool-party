@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en"><head><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1CQ4D3VQ3L"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-1CQ4D3VQ3L');
+  </script>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Pool Party: Volumetric Raymarching Visualizer</title>
+
+<meta name="description" content="Experience stunning real-time volumetric raymarching. Customize fractal complexity, distortion, and colors to create unique abstract 4K wallpapers.">
+<meta name="keywords" content="WebGL, Raymarching, Fractal Art, Generative Art, Visualization, Shader, 4K Wallpaper, Abstract Art">
+<meta name="author" content="Chris Pirillo">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0f172a">
+
+<meta property="og:site_name" content="Chris Pirillo's Arcade">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pool Party: Volumetric Raymarching Visualizer">
+<meta property="og:description" content="Experience stunning real-time volumetric raymarching. Customize fractal complexity, distortion, and colors to create unique abstract 4K wallpapers.">
+<meta property="og:url" content="https://pirillo.com/arcade/pool-party.html">
+<meta property="og:image" content="https://pirillo.com/arcade/images/pool-party.png">
+<meta property="og:image:alt" content="Pool Party: Volumetric Raymarching Visualizer">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@ChrisPirillo">
+<meta name="twitter:creator" content="@ChrisPirillo">
+<meta name="twitter:title" content="Pool Party: Volumetric Raymarching Visualizer">
+<meta name="twitter:description" content="Experience stunning real-time volumetric raymarching. Customize fractal complexity, distortion, and colors to create unique abstract 4K wallpapers.">
+<meta name="twitter:image" content="https://pirillo.com/arcade/images/pool-party.png">
+<meta name="twitter:domain" content="pirillo.com">
+
+<link rel="canonical" href="https://pirillo.com/arcade/pool-party.html">
+
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Pool Party: Volumetric Raymarching Visualizer",
+  "description": "Experience stunning real-time volumetric raymarching. Customize fractal complexity, distortion, and colors to create unique abstract 4K wallpapers.",
+  "keywords": "WebGL, Raymarching, Fractal Art, Generative Art, Visualization, Shader, 4K Wallpaper, Abstract Art",
+  "url": "https://pirillo.com/arcade/pool-party.html",
+  "image": "https://pirillo.com/arcade/images/pool-party.png",
+  "primaryImageOfPage": {
+    "@type": "ImageObject",
+    "url": "https://pirillo.com/arcade/images/pool-party.png"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Chris Pirillo",
+    "url": "https://pirillo.com",
+    "sameAs": [
+      "https://x.com/ChrisPirillo"
+    ]
+  },
+  "mainEntity": {
+    "name": "Pool Party: Volumetric Raymarching Visualizer",
+    "description": "Experience stunning real-time volumetric raymarching. Customize fractal complexity, distortion, and colors to create unique abstract 4K wallpapers.",
+    "image": "https://pirillo.com/arcade/images/pool-party.png",
+    "operatingSystem": "Web Browser",
+    "author": {
+      "@type": "Person",
+      "name": "Chris Pirillo"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    },
+    "@type": "WebApplication",
+    "applicationCategory": "Simulation"
+  }
+}</script>
+
+<meta charset="UTF-8">
+<style>:root { --bg-color: #000; --panel-bg: rgba(20, 20, 20, 0.85); --panel-border: 1px solid rgba(255, 255, 255, 0.1); --accent: #00e5ff; --text-main: #eee; --text-dim: #aaa; --font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; --transition-speed: 0.3s; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-color); overflow: hidden; font-family: var(--font-family); color: var(--text-main); user-select: none; }
+canvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; cursor: grab; image-rendering: auto; }
+canvas:active { cursor: grabbing; }
+#transition-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; pointer-events: none; z-index: 2; opacity: 0; transition: opacity 0.4s ease-in-out; }
+#menu-btn { position: absolute; top: 20px; right: 20px; z-index: 100; width: 44px; height: 44px; background: rgba(0,0,0,0.5); border-radius: 50%; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; transition: all 0.2s; }
+#menu-btn:hover { transform: scale(1.1); background: rgba(0,0,0,0.8); }
+#menu-btn span { width: 20px; height: 2px; background: white; border-radius: 2px; transition: all 0.3s; }
+#menu-btn.open { opacity: 0; pointer-events: none; }
+#menu-btn.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+#menu-btn.open span:nth-child(2) { opacity: 0; }
+#menu-btn.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+#settings-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 340px; max-width: 90vw; background: var(--panel-bg); backdrop-filter: blur(15px); border-left: var(--panel-border); z-index: 50; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); display: flex; flex-direction: column; }
+#settings-panel.active { transform: translateX(0); }
+.panel-header { flex: 0 0 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: var(--panel-border); background: rgba(20, 20, 20, 0.95); z-index: 2; }
+.panel-title { font-weight: 600; font-size: 16px; letter-spacing: 0.5px; }
+.header-controls { display: flex; align-items: center; gap: 15px; }
+.close-btn { cursor: pointer; font-size: 28px; color: var(--text-dim); line-height: 0.8; padding: 5px; transition: color 0.2s; }
+.close-btn:hover { color: white; }
+.panel-content { flex: 1; overflow-y: auto; padding: 20px; scrollbar-width: thin; scrollbar-color: #444 transparent; }
+.panel-content::-webkit-scrollbar { width: 6px; }
+.panel-content::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+.control-group { margin-bottom: 20px; }
+.control-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+.control-value { color: var(--accent); font-family: monospace; }
+input[type="range"] { width: 100%; height: 4px; background: #333; outline: none; appearance: none; border-radius: 2px; }
+input[type="range"]::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; background: var(--text-main); border-radius: 50%; cursor: pointer; border: 2px solid #000; transition: transform 0.1s; }
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); background: var(--accent); }
+input[type="color"] { width: 100%; height: 30px; border: none; background: transparent; cursor: pointer; }
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.btn { background: rgba(255,255,255,0.05); border: var(--panel-border); color: var(--text-main); padding: 12px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
+.btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+.btn-accent { background: rgba(0, 229, 255, 0.15); border-color: rgba(0, 229, 255, 0.3); color: var(--accent); }
+.btn-accent:hover { background: rgba(0, 229, 255, 0.25); box-shadow: 0 0 10px rgba(0,229,255,0.2); }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px; }
+.toggle-switch { position: relative; width: 40px; height: 20px; background: #333; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+.toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: 0.3s; }
+.toggle-active { background: rgba(0, 229, 255, 0.5); }
+.toggle-active::after { transform: translateX(20px); }
+#info-icon { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--text-dim); color: var(--text-dim); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+#info-icon:hover { border-color: var(--accent); color: var(--accent); }
+#info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+#info-modal.active { opacity: 1; pointer-events: all; }
+.modal-content { background: #1a1a1a; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto; }
+.modal-content h2 { margin-top: 0; color: var(--accent); }
+.modal-content a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.modal-content a:hover { color: white; border-bottom-style: solid; }
+.modal-close { margin-top: 20px; width: 100%; }
+#toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(20, 20, 20, 0.9); border: 1px solid var(--accent); padding: 10px 20px; border-radius: 30px; z-index: 300; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 14px; }
+#toast.active { transform: translateX(-50%) translateY(0); }</style>
+</head>
+<body><h1 style="display: none;">Pool Party: Volumetric Raymarching Visualizer</h1>
+
+    <canvas id="glcanvas"></canvas>
+    <div id="transition-overlay"></div>
+
+    <div id="menu-btn"><span></span><span></span><span></span></div>
+
+    <div id="settings-panel">
+        <div class="panel-header">
+            <div class="panel-title">POOL PARTY</div>
+            <div class="header-controls">
+                <div id="info-icon">?</div>
+                <div class="close-btn">×</div>
+            </div>
+        </div>
+        <div class="panel-content" id="controls-container">
+            
+            <div class="action-grid">
+                <button class="btn btn-accent" id="btn-randomize">Randomize</button>
+                <button class="btn" id="btn-reset">Reset</button>
+                <button class="btn" id="btn-export-img">Export 4K</button>
+                <button class="btn" id="btn-io">Import/Export</button>
+            </div>
+
+            <div class="toggle-row">
+                <span style="font-size: 13px; color: #ddd;">Auto-Advance</span>
+                <div class="toggle-switch" id="auto-advance-toggle"></div>
+            </div>
+            <div class="control-group" id="auto-speed-control" style="display:none;">
+                 <div class="control-label">Interval (sec) <span class="control-value" id="val-interval">5</span></div>
+                 <input type="range" id="inp-interval" min="2" max="60" step="1" value="5">
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+
+            <!-- Dynamic controls injected here via JS -->
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="file-import" style="display: none;" accept=".json">
+
+    <div id="info-modal">
+        <div class="modal-content">
+            <h2>Pool Party</h2>
+            <p>This application renders a complex volumetric raymarching formula in real-time using WebGL 2. The formula is a derivative of work by XorDev, adapted for granular control.</p>
+            
+            <h3>Controls</h3>
+            <ul style="padding-left: 20px; color: #ccc; font-size: 14px;">
+                <li><strong>Drag Canvas:</strong> Rotate Camera (Tilt/Pan).</li>
+                <li><strong>Scroll Canvas:</strong> Zoom In/Out.</li>
+                <li><strong>Click Canvas:</strong> Instant Randomization (if not dragging).</li>
+                <li><strong>Menu:</strong> Precise control over math constants, loops, and colors.</li>
+                <li><strong>4K Export:</strong> Renders a high-res frame to PNG.</li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul style="padding-left: 20px; font-size: 14px;">
+                <li><a href="https://pirillo.com/arcade/" target="_blank">More Apps</a></li>
+                <li><a href="https://chris.pirillo.com/" target="_blank">Follow Chris Pirillo</a></li>
+                <li><a href="https://ctrlaltcreate.live/" target="_blank">Learn More</a></li>
+            </ul>
+            <button class="btn modal-close">Close</button>
+        </div>
+    </div>
+
+    <div id="toast">Settings Saved</div>
+
+<script>
+/**
+ * APP STATE & CONFIGURATION
+ */
+const CONFIG = {
+    // Shader Uniforms
+    quality: { value: 0.75, min: 0.25, max: 1.0, step: 0.05, name: 'Quality (Resolution)' }, // NEW: Performance control
+    speed: { value: 1.0, min: 0.0, max: 5.0, name: 'Time Speed' },
+    zoom: { value: 1.0, min: 0.5, max: 4.0, name: 'Zoom (FOV)' },
+    tiltX: { value: 0.0, min: -2.0, max: 2.0, name: 'Tilt Vertical' },
+    tiltY: { value: 0.0, min: -2.0, max: 2.0, name: 'Tilt Horizontal' },
+    // Optimized default constraints for performance
+    loopOuter: { value: 40, min: 28, max: 50, step: 1, name: 'Ray Steps' }, // Default lowered from 50
+    loopInner: { value: 8, min: 1, max: 20, step: 1, name: 'Complexity' }, // Default lowered from 9
+    // Brightness removed from CONFIG to hide from UI
+    distort: { value: 0.4, min: 0.0, max: 2.0, name: 'Distortion' },
+    scale: { value: 7.0, min: 1.0, max: 20.0, name: 'Scale Factor' },
+    fog: { value: 100.0, min: 10.0, max: 500.0, name: 'Fog Density' },
+    colorShift1: { value: [6.0, 1.0, 2.0], type: 'vec3', name: 'Color Vector A' }, 
+    colorShift2: { value: [4.0, 2.0, 1.0], type: 'vec3', name: 'Color Vector B' }, 
+};
+
+// Fixed internal constant
+const CONSTANTS = {
+    brightness: 0.9
+};
+
+// Store deep copy of defaults for true reset
+const DEFAULTS = JSON.parse(JSON.stringify(CONFIG));
+
+const APP = {
+    autoAdvance: false,
+    autoAdvanceInterval: 5000,
+    lastAutoTime: 0,
+    startTime: Date.now(),
+    isMenuOpen: false,
+    gl: null,
+    program: null,
+    canvas: null,
+    uniformLocs: {},
+    width: 0,
+    height: 0,
+    // Interaction State
+    isDragging: false,
+    lastMouseX: 0,
+    lastMouseY: 0,
+    dragThresholdExceeded: false
+};
+
+/**
+ * SHADER SOURCE
+ */
+const VS_SOURCE = `#version 300 es
+in vec4 position;
+void main() {
+    gl_Position = position;
+}`;
+
+const FS_SOURCE = `#version 300 es
+precision highp float;
+
+uniform float u_time;
+uniform vec2 u_resolution;
+
+// Configurable uniforms
+uniform float u_loopOuter;
+uniform float u_loopInner;
+uniform float u_brightness;
+uniform float u_distort;
+uniform float u_scale;
+uniform float u_fog;
+uniform vec3 u_col1;
+uniform vec3 u_col2;
+
+// Camera
+uniform float u_zoom;
+uniform float u_tiltX;
+uniform float u_tiltY;
+
+out vec4 fragColor;
+
+mat2 rot(float a) {
+    float s = sin(a), c = cos(a);
+    return mat2(c, -s, s, c);
+}
+
+void main() {
+    vec4 o = vec4(0.0);
+    vec2 r = u_resolution;
+    float t = u_time;
+    vec4 FC = gl_FragCoord;
+    
+    // Core Logic
+    float z = 0.0, d = 0.0, i = 0.0;
+    
+    // Outer Loop (Raymarching steps)
+    for(i = 0.0; i < u_loopOuter; i++) {
+        
+        // Ray setup
+        vec3 ray = normalize(vec3(FC.xy * 2.0 - r.xy, -r.y * u_zoom));
+        
+        // Apply camera rotation
+        ray.yz *= rot(u_tiltX);
+        ray.xz *= rot(u_tiltY);
+        
+        vec3 p = z * ray;
+        
+        // Inner Loop (Fractal/Folding)
+        for(float j = 0.0; j < u_loopInner; j++) {
+            // p.yzx swizzle
+            p += u_distort * sin(p.yzx * j - z + t + i) / (j + 1.0) + 0.5;
+        }
+        
+        // Distance function
+        vec4 measure = vec4(abs(p.y + p.z * 0.5), sin(p - z) / u_scale);
+        d = length(measure) / (4.0 + z * z / u_fog);
+        
+        z += d;
+        
+        // Accumulate Color
+        vec4 colMod = vec4(sin(i * 0.1 - u_col1), 0.0);
+        vec4 colDiv = vec4(u_col2, 1.0); // Avoid div by zero
+        
+        o += (u_brightness + colMod) / d / d / z + (d * z / colDiv);
+    }
+    
+    o = tanh(o / 2000.0);
+    fragColor = vec4(o.rgb, 1.0);
+}
+`;
+
+/**
+ * INITIALIZATION
+ */
+function init() {
+    APP.canvas = document.getElementById('glcanvas');
+    APP.gl = APP.canvas.getContext('webgl2', { alpha: false, preserveDrawingBuffer: true }); // preserve for export
+
+    if (!APP.gl) {
+        alert("WebGL 2 not supported by your browser.");
+        return;
+    }
+
+    createProgram();
+    buildUI();
+    setupEvents();
+    randomizeSettings(true); // Initial random
+    requestAnimationFrame(render);
+}
+
+function createProgram() {
+    const gl = APP.gl;
+    const program = gl.createProgram();
+    
+    const vs = compileShader(gl, gl.VERTEX_SHADER, VS_SOURCE);
+    const fs = compileShader(gl, gl.FRAGMENT_SHADER, FS_SOURCE);
+
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error(gl.getProgramInfoLog(program));
+        return;
+    }
+
+    APP.program = program;
+    gl.useProgram(program);
+
+    // Full screen quad buffer
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -1, -1, 1, -1, -1, 1,
+        -1, 1, 1, -1, 1, 1,
+    ]), gl.STATIC_DRAW);
+
+    const positionLoc = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(positionLoc);
+    gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+    // Get Uniform Locations
+    APP.uniformLocs.time = gl.getUniformLocation(program, 'u_time');
+    APP.uniformLocs.res = gl.getUniformLocation(program, 'u_resolution');
+    
+    APP.uniformLocs.loopOuter = gl.getUniformLocation(program, 'u_loopOuter');
+    APP.uniformLocs.loopInner = gl.getUniformLocation(program, 'u_loopInner');
+    APP.uniformLocs.brightness = gl.getUniformLocation(program, 'u_brightness');
+    APP.uniformLocs.distort = gl.getUniformLocation(program, 'u_distort');
+    APP.uniformLocs.scale = gl.getUniformLocation(program, 'u_scale');
+    APP.uniformLocs.fog = gl.getUniformLocation(program, 'u_fog');
+    APP.uniformLocs.col1 = gl.getUniformLocation(program, 'u_col1');
+    APP.uniformLocs.col2 = gl.getUniformLocation(program, 'u_col2');
+
+    // New Camera Uniforms
+    APP.uniformLocs.zoom = gl.getUniformLocation(program, 'u_zoom');
+    APP.uniformLocs.tiltX = gl.getUniformLocation(program, 'u_tiltX');
+    APP.uniformLocs.tiltY = gl.getUniformLocation(program, 'u_tiltY');
+}
+
+function compileShader(gl, type, source) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, source);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(s));
+    }
+    return s;
+}
+
+/**
+ * RENDERING
+ */
+function render(now) {
+    const gl = APP.gl;
+
+    // Auto Advance Logic
+    if (APP.autoAdvance && !APP.isMenuOpen && !APP.isDragging) {
+        if (now - APP.lastAutoTime > APP.autoAdvanceInterval) {
+            transitionRandomize();
+            APP.lastAutoTime = now;
+        }
+    }
+
+    // Resolution Management (Dynamic Quality)
+    const q = CONFIG.quality.value;
+    const targetW = Math.floor(APP.canvas.clientWidth * q);
+    const targetH = Math.floor(APP.canvas.clientHeight * q);
+
+    if (APP.canvas.width !== targetW || APP.canvas.height !== targetH) {
+        APP.canvas.width = targetW;
+        APP.canvas.height = targetH;
+        gl.viewport(0, 0, targetW, targetH);
+    }
+
+    const time = (Date.now() - APP.startTime) * 0.001 * CONFIG.speed.value;
+
+    gl.useProgram(APP.program);
+    
+    gl.uniform1f(APP.uniformLocs.time, time);
+    gl.uniform2f(APP.uniformLocs.res, APP.canvas.width, APP.canvas.height);
+
+    gl.uniform1f(APP.uniformLocs.loopOuter, CONFIG.loopOuter.value);
+    gl.uniform1f(APP.uniformLocs.loopInner, CONFIG.loopInner.value);
+    
+    // Pass fixed brightness
+    gl.uniform1f(APP.uniformLocs.brightness, CONSTANTS.brightness);
+    
+    gl.uniform1f(APP.uniformLocs.distort, CONFIG.distort.value);
+    gl.uniform1f(APP.uniformLocs.scale, CONFIG.scale.value);
+    gl.uniform1f(APP.uniformLocs.fog, CONFIG.fog.value);
+    
+    gl.uniform3fv(APP.uniformLocs.col1, CONFIG.colorShift1.value);
+    gl.uniform3fv(APP.uniformLocs.col2, CONFIG.colorShift2.value);
+
+    // New Camera Params
+    gl.uniform1f(APP.uniformLocs.zoom, CONFIG.zoom.value);
+    gl.uniform1f(APP.uniformLocs.tiltX, CONFIG.tiltX.value);
+    gl.uniform1f(APP.uniformLocs.tiltY, CONFIG.tiltY.value);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    requestAnimationFrame(render);
+}
+
+/**
+ * UI GENERATION & LOGIC
+ */
+function buildUI() {
+    const container = document.getElementById('controls-container');
+    
+    const existing = container.querySelectorAll('.generated-control');
+    existing.forEach(el => el.remove());
+
+    const fragment = document.createDocumentFragment();
+
+    for (const [key, param] of Object.entries(CONFIG)) {
+        const group = document.createElement('div');
+        // Add 'generated-control' to identify these as removable
+        group.className = 'control-group generated-control';
+
+        if (param.type === 'vec3') {
+            // Color Picker
+            const label = document.createElement('div');
+            label.className = 'control-label';
+            label.innerText = param.name;
+            group.appendChild(label);
+
+            const input = document.createElement('input');
+            input.type = 'color';
+            input.value = vec3ToHex(param.value);
+            input.oninput = (e) => {
+                CONFIG[key].value = hexToVec3(e.target.value);
+            };
+            // Add reference to input so we can update it on randomize
+            param.el = input; 
+            group.appendChild(input);
+
+        } else {
+            // Range Slider
+            const label = document.createElement('div');
+            label.className = 'control-label';
+            label.innerHTML = `${param.name} <span class="control-value">${parseFloat(param.value).toFixed(2)}</span>`;
+            group.appendChild(label);
+
+            const input = document.createElement('input');
+            input.type = 'range';
+            input.min = param.min;
+            input.max = param.max;
+            input.step = param.step || 0.01;
+            input.value = param.value;
+            
+            input.oninput = (e) => {
+                const val = parseFloat(e.target.value);
+                CONFIG[key].value = val;
+                label.querySelector('.control-value').innerText = val.toFixed(2);
+            };
+            param.el = input;
+            param.labelEl = label.querySelector('.control-value');
+            group.appendChild(input);
+        }
+        fragment.appendChild(group);
+    }
+    
+    // Append generated controls to the end of the container
+    container.appendChild(fragment);
+}
+
+/**
+ * INTERACTION LOGIC
+ */
+function setupEvents() {
+    const panel = document.getElementById('settings-panel');
+    const menuBtn = document.getElementById('menu-btn');
+    const closeBtn = document.querySelector('.close-btn');
+
+    // Toggle Menu
+    function toggleMenu(open) {
+        APP.isMenuOpen = open;
+        if(open) {
+            panel.classList.add('active');
+            menuBtn.classList.add('open');
+        } else {
+            panel.classList.remove('active');
+            menuBtn.classList.remove('open');
+        }
+    }
+
+    menuBtn.onclick = (e) => {
+        e.stopPropagation();
+        toggleMenu(!APP.isMenuOpen);
+    };
+    closeBtn.onclick = () => toggleMenu(false);
+
+    // --- MOUSE & TOUCH INTERACTION START ---
+    
+    // Wheel Zoom
+    APP.canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const sensitivity = 0.002;
+        let newZoom = CONFIG.zoom.value + e.deltaY * sensitivity;
+        // Clamp
+        newZoom = Math.max(CONFIG.zoom.min, Math.min(CONFIG.zoom.max, newZoom));
+        
+        // Update CONFIG and UI
+        CONFIG.zoom.value = newZoom;
+        if(CONFIG.zoom.el) CONFIG.zoom.el.value = newZoom;
+        if(CONFIG.zoom.labelEl) CONFIG.zoom.labelEl.innerText = newZoom.toFixed(2);
+    }, { passive: false });
+
+    // Drag Logic
+    const startDrag = (x, y) => {
+        APP.isDragging = true;
+        APP.lastMouseX = x;
+        APP.lastMouseY = y;
+        APP.dragThresholdExceeded = false;
+    };
+
+    const moveDrag = (x, y) => {
+        if (!APP.isDragging) return;
+
+        const dx = x - APP.lastMouseX;
+        const dy = y - APP.lastMouseY;
+
+        // Check if movement is significant enough to cancel a "click"
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+            APP.dragThresholdExceeded = true;
+        }
+
+        const sensitivity = 0.005;
+
+        // Update Tilt X (Up/Down) and Tilt Y (Left/Right)
+        let tx = CONFIG.tiltX.value + dy * sensitivity;
+        let ty = CONFIG.tiltY.value + dx * sensitivity;
+
+        // Clamp
+        tx = Math.max(CONFIG.tiltX.min, Math.min(CONFIG.tiltX.max, tx));
+        ty = Math.max(CONFIG.tiltY.min, Math.min(CONFIG.tiltY.max, ty));
+
+        CONFIG.tiltX.value = tx;
+        CONFIG.tiltY.value = ty;
+
+        // Sync UI if visible
+        if(CONFIG.tiltX.el) { CONFIG.tiltX.el.value = tx; CONFIG.tiltX.labelEl.innerText = tx.toFixed(2); }
+        if(CONFIG.tiltY.el) { CONFIG.tiltY.el.value = ty; CONFIG.tiltY.labelEl.innerText = ty.toFixed(2); }
+
+        APP.lastMouseX = x;
+        APP.lastMouseY = y;
+    };
+
+    const endDrag = (e) => {
+        // If we didn't drag far, treat it as a click for Randomize
+        if (APP.isDragging && !APP.dragThresholdExceeded) {
+             // Only randomize if menu is closed and not clicking UI
+            if (!APP.isMenuOpen) {
+                transitionRandomize();
+            }
+        }
+        APP.isDragging = false;
+    };
+
+    // Mouse Listeners
+    APP.canvas.addEventListener('mousedown', (e) => {
+        if (APP.isMenuOpen) return;
+        startDrag(e.clientX, e.clientY);
+    });
+    window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+    window.addEventListener('mouseup', endDrag);
+
+    // Touch Listeners (Basic)
+    APP.canvas.addEventListener('touchstart', (e) => {
+        if (APP.isMenuOpen || e.touches.length > 1) return;
+        startDrag(e.touches[0].clientX, e.touches[0].clientY);
+    }, {passive: false});
+    
+    window.addEventListener('touchmove', (e) => {
+        if(APP.isDragging) {
+             e.preventDefault(); // Prevent scrolling while dragging
+             moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, {passive: false});
+    
+    window.addEventListener('touchend', endDrag);
+
+    // --- MOUSE & TOUCH INTERACTION END ---
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            toggleMenu(false);
+            document.getElementById('info-modal').classList.remove('active');
+        }
+    });
+
+    // Buttons
+    document.getElementById('btn-randomize').onclick = transitionRandomize;
+    
+    document.getElementById('btn-reset').onclick = () => {
+        // Hard Reset using deep copied defaults
+        for (const key in DEFAULTS) {
+            if (CONFIG[key]) {
+                const defVal = DEFAULTS[key].value;
+                CONFIG[key].value = Array.isArray(defVal) ? [...defVal] : defVal; 
+                
+                // Update UI
+                if(CONFIG[key].type === 'vec3') {
+                    if(CONFIG[key].el) CONFIG[key].el.value = vec3ToHex(defVal);
+                } else {
+                    if(CONFIG[key].el) CONFIG[key].el.value = defVal;
+                    if(CONFIG[key].labelEl) CONFIG[key].labelEl.innerText = parseFloat(defVal).toFixed(2);
+                }
+            }
+        }
+        showToast("Full Reset Applied");
+    };
+
+    document.getElementById('btn-export-img').onclick = exportWallpaper;
+    document.getElementById('btn-io').onclick = handleIO;
+
+    // Auto Advance Toggle
+    const toggle = document.getElementById('auto-advance-toggle');
+    const speedCtrl = document.getElementById('auto-speed-control');
+    toggle.onclick = () => {
+        APP.autoAdvance = !APP.autoAdvance;
+        toggle.classList.toggle('toggle-active');
+        speedCtrl.style.display = APP.autoAdvance ? 'block' : 'none';
+        APP.lastAutoTime = performance.now();
+    };
+
+    document.getElementById('inp-interval').oninput = (e) => {
+        APP.autoAdvanceInterval = e.target.value * 1000;
+        document.getElementById('val-interval').innerText = e.target.value;
+    };
+
+    // Info Modal
+    document.getElementById('info-icon').onclick = () => document.getElementById('info-modal').classList.add('active');
+    document.querySelector('.modal-close').onclick = () => document.getElementById('info-modal').classList.remove('active');
+    
+    // File Import
+    document.getElementById('file-import').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                applySettings(data);
+                showToast("Settings Imported");
+            } catch(err) {
+                alert("Invalid settings file");
+            }
+        };
+        reader.readAsText(file);
+    };
+}
+
+/**
+ * HELPERS
+ */
+function transitionRandomize() {
+    const overlay = document.getElementById('transition-overlay');
+    overlay.style.opacity = '1';
+    
+    setTimeout(() => {
+        randomizeSettings();
+        setTimeout(() => {
+            overlay.style.opacity = '0';
+        }, 100);
+    }, 400); // Wait for fade out
+}
+
+function randomizeSettings(isInit = false) {
+    // Generate valid randoms within specific artistic bounds
+    
+    // Updated Constraint: Ray Steps 28-50
+    updateParamUI('loopOuter', Math.floor(rand(28, 50))); 
+    
+    updateParamUI('loopInner', rand(4, 15));
+    updateParamUI('scale', rand(3, 15));
+    updateParamUI('distort', rand(0.1, 0.8));
+    updateParamUI('fog', rand(50, 300));
+    // Brightness is no longer randomized
+    
+    // Random Colors
+    const col1 = [rand(0, 10), rand(0, 10), rand(0, 10)];
+    const col2 = [rand(0, 5), rand(0, 5), rand(0, 5)];
+    
+    CONFIG.colorShift1.value = col1;
+    CONFIG.colorShift2.value = col2;
+    CONFIG.colorShift1.el.value = vec3ToHex(col1);
+    CONFIG.colorShift2.el.value = vec3ToHex(col2);
+
+    // Randomize Camera slightly for variety (but keep mostly centered)
+    updateParamUI('zoom', rand(0.8, 1.5));
+    updateParamUI('tiltX', rand(-0.5, 0.5));
+    updateParamUI('tiltY', rand(-0.5, 0.5));
+
+    if(!isInit && !APP.autoAdvance) showToast("Randomized");
+}
+
+function updateParamUI(key, val) {
+    CONFIG[key].value = val;
+    if (CONFIG[key].el) {
+        CONFIG[key].el.value = val;
+        if(CONFIG[key].labelEl) CONFIG[key].labelEl.innerText = val.toFixed(2);
+    }
+}
+
+function rand(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function vec3ToHex(v) {
+    // Basic mapping: v components are technically arbitrary floats in shader, 
+    // but for picker we treat them modulo 1 or clamped 0-1 if we normalized.
+    // The shader uses raw values like 6.0, 1.0 etc.
+    // To represent this in a color picker is tricky. 
+    // We will generate a representative color hash or just clamp standard RGB.
+    // Simplified: map 0-1.
+    const toHex = c => {
+        // Wrap large values into 0-255 range for visual representation
+        let i = Math.floor(Math.abs(c) * 40) % 255; 
+        return i.toString(16).padStart(2, '0');
+    };
+    return '#' + toHex(v[0]) + toHex(v[1]) + toHex(v[2]);
+}
+
+function hexToVec3(hex) {
+    const r = parseInt(hex.substr(1, 2), 16) / 40;
+    const g = parseInt(hex.substr(3, 2), 16) / 40;
+    const b = parseInt(hex.substr(5, 2), 16) / 40;
+    return [r, g, b];
+}
+
+function handleIO() {
+    const choice = confirm("Press OK to EXPORT settings.\nPress Cancel to IMPORT settings.");
+    if (choice) {
+        // Export
+        const exportData = {};
+        for (const key in CONFIG) exportData[key] = CONFIG[key].value;
+        const blob = new Blob([JSON.stringify(exportData)], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const date = new Date().toISOString().slice(0,19).replace(/:/g,"-");
+        a.download = `PoolParty_Config_${date}.json`;
+        a.click();
+    } else {
+        // Import
+        document.getElementById('file-import').click();
+    }
+}
+
+function applySettings(data) {
+    for (const key in data) {
+        if (CONFIG[key]) {
+            CONFIG[key].value = data[key];
+            // Update UI elements
+            if (CONFIG[key].type === 'vec3') {
+                CONFIG[key].el.value = vec3ToHex(data[key]);
+            } else {
+                CONFIG[key].el.value = data[key];
+                if(CONFIG[key].labelEl) CONFIG[key].labelEl.innerText = parseFloat(data[key]).toFixed(2);
+            }
+        }
+    }
+}
+
+function exportWallpaper() {
+    // Create 4K canvas
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = 3840;
+    offCanvas.height = 2160;
+    const glOff = offCanvas.getContext('webgl2', { preserveDrawingBuffer: true });
+    
+    if(!glOff) { alert("Cannot create 4K context"); return; }
+
+    // Minimal program setup for offline render
+    const p = glOff.createProgram();
+    glOff.attachShader(p, compileShader(glOff, glOff.VERTEX_SHADER, VS_SOURCE));
+    glOff.attachShader(p, compileShader(glOff, glOff.FRAGMENT_SHADER, FS_SOURCE));
+    glOff.linkProgram(p);
+    glOff.useProgram(p);
+
+    // Buffer
+    const b = glOff.createBuffer();
+    glOff.bindBuffer(glOff.ARRAY_BUFFER, b);
+    glOff.bufferData(glOff.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), glOff.STATIC_DRAW);
+    const loc = glOff.getAttribLocation(p, 'position');
+    glOff.enableVertexAttribArray(loc);
+    glOff.vertexAttribPointer(loc, 2, glOff.FLOAT, false, 0, 0);
+
+    // Set Uniforms from current CONFIG
+    const u = (n) => glOff.getUniformLocation(p, n);
+    glOff.viewport(0, 0, 3840, 2160);
+    
+    // Calculate current time
+    const time = (Date.now() - APP.startTime) * 0.001 * CONFIG.speed.value;
+
+    glOff.uniform1f(u('u_time'), time);
+    glOff.uniform2f(u('u_resolution'), 3840, 2160);
+    glOff.uniform1f(u('u_loopOuter'), CONFIG.loopOuter.value);
+    glOff.uniform1f(u('u_loopInner'), CONFIG.loopInner.value);
+    
+    glOff.uniform1f(u('u_brightness'), CONSTANTS.brightness);
+    
+    glOff.uniform1f(u('u_distort'), CONFIG.distort.value);
+    glOff.uniform1f(u('u_scale'), CONFIG.scale.value);
+    glOff.uniform1f(u('u_fog'), CONFIG.fog.value);
+    glOff.uniform3fv(u('u_col1'), CONFIG.colorShift1.value);
+    glOff.uniform3fv(u('u_col2'), CONFIG.colorShift2.value);
+
+    // New Camera params
+    glOff.uniform1f(u('u_zoom'), CONFIG.zoom.value);
+    glOff.uniform1f(u('u_tiltX'), CONFIG.tiltX.value);
+    glOff.uniform1f(u('u_tiltY'), CONFIG.tiltY.value);
+
+    glOff.drawArrays(glOff.TRIANGLES, 0, 6);
+
+    // Download
+    offCanvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `PoolParty_Wallpaper_4K.png`;
+        a.click();
+        showToast("4K Wallpaper Saved");
+    });
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.classList.add('active');
+    setTimeout(() => t.classList.remove('active'), 2000);
+}
+
+// Start
+window.onload = init;
+
+</script>
+
+</body></html>
